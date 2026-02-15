@@ -1,0 +1,8 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+Your account email address has been changed as requested.
+
+  \_/
+()o_o) <( Please verify your new email address! )

@@ -1,0 +1,8 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+Your account password has been changed as requested.
+
+  \_/
+()o_o) <( Changing your password will not log you out of any devices! You can log out devices via the security page in settings! )

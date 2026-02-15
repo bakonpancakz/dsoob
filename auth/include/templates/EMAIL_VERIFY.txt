@@ -1,0 +1,10 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+Please click the link below to verify your email address:
+
+https://{{ .Host }}/verify-email?token={{ .Data.Token }}
+
+   \_/
+()o_o) <( Verifying your email will enable two-factor authentication for your account! )

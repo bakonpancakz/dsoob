@@ -1,0 +1,12 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+Use the following code to make changes to your account:
+
+{{ .Data.Code }}
+
+This code will expire in {{ .Data.Lifetime }} minutes.
+
+  \_/
+()o_o) <( Do NOT share this code with anyone! )
