@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"math/big"
 	"net/http"
 	"os"
 	"strconv"
@@ -151,42 +150,42 @@ func DebugDatabaseUpdateGeolocation() {
 	}
 
 	// Process IPV6 CSV
-	{
-		tools.LoggerGeolocation.Log(tools.INFO, "Downloading IPV6 Archive")
-		f, err := download("DB11LITECSVIPV6", "IP2LOCATION-LITE-DB11.IPV6.CSV", REQUEST_KEY)
-		if err != nil {
-			tools.LoggerGeolocation.Log(tools.FATAL, "%s", err)
-			return
-		}
-		defer f.Close()
+	// {
+	// 	tools.LoggerGeolocation.Log(tools.INFO, "Downloading IPV6 Archive")
+	// 	f, err := download("DB11LITECSVIPV6", "IP2LOCATION-LITE-DB11.IPV6.CSV", REQUEST_KEY)
+	// 	if err != nil {
+	// 		tools.LoggerGeolocation.Log(tools.FATAL, "%s", err)
+	// 		return
+	// 	}
+	// 	defer f.Close()
 
-		tools.LoggerGeolocation.Log(tools.INFO, "Parsing IPV6 Archive")
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			splits := strings.SplitN(scanner.Text(), ",", 10)
-			if len(splits) != 10 {
-				tools.LoggerGeolocation.Log(tools.FATAL,
-					"Error Decoding Line %d: Bad Split", len(ENTRIES_IPV6)+1)
-			}
-			rangeStr := trimString(splits[0])
-			bigInt := new(big.Int)
-			if _, ok := bigInt.SetString(rangeStr, 10); !ok {
-				tools.LoggerGeolocation.Log(tools.FATAL,
-					"Error Decoding Range on Line %d", len(ENTRIES_IPV6)+1)
-			}
-			rangeBytes := bigInt.FillBytes(make([]byte, 16)) // big-endian by default
-			rangeStart := [16]byte{}
-			copy(rangeStart[:], rangeBytes)
+	// 	tools.LoggerGeolocation.Log(tools.INFO, "Parsing IPV6 Archive")
+	// 	scanner := bufio.NewScanner(f)
+	// 	for scanner.Scan() {
+	// 		splits := strings.SplitN(scanner.Text(), ",", 10)
+	// 		if len(splits) != 10 {
+	// 			tools.LoggerGeolocation.Log(tools.FATAL,
+	// 				"Error Decoding Line %d: Bad Split", len(ENTRIES_IPV6)+1)
+	// 		}
+	// 		rangeStr := trimString(splits[0])
+	// 		bigInt := new(big.Int)
+	// 		if _, ok := bigInt.SetString(rangeStr, 10); !ok {
+	// 			tools.LoggerGeolocation.Log(tools.FATAL,
+	// 				"Error Decoding Range on Line %d", len(ENTRIES_IPV6)+1)
+	// 		}
+	// 		rangeBytes := bigInt.FillBytes(make([]byte, 16)) // big-endian by default
+	// 		rangeStart := [16]byte{}
+	// 		copy(rangeStart[:], rangeBytes)
 
-			ENTRIES_IPV6 = append(ENTRIES_IPV6, IPV6Entry{
-				RangeStart:     rangeStart,
-				CountryIndex:   findString(trimString(splits[3])),
-				RegionIndex:    findString(trimString(splits[4])),
-				CityIndex:      findString(trimString(splits[5])),
-				TimezoneOffset: parseOffset(trimString(splits[9])),
-			})
-		}
-	}
+	// 		ENTRIES_IPV6 = append(ENTRIES_IPV6, IPV6Entry{
+	// 			RangeStart:     rangeStart,
+	// 			CountryIndex:   findString(trimString(splits[3])),
+	// 			RegionIndex:    findString(trimString(splits[4])),
+	// 			CityIndex:      findString(trimString(splits[5])),
+	// 			TimezoneOffset: parseOffset(trimString(splits[9])),
+	// 		})
+	// 	}
+	// }
 
 	// Begin Compression
 	tools.LoggerGeolocation.Log(tools.INFO,
