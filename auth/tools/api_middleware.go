@@ -16,12 +16,8 @@ type SessionData struct {
 	UserID    int64 // Relevant User ID
 	Elevated  bool  // Relevant Session Elevated?
 }
-type RatelimitOptions struct {
-	Period time.Duration // Reset Period
-	Limit  int64         // Maximum Amount of Requests
-}
 
-type RatelimitEntry struct {
+type ratelimitEntry struct {
 	Usage     int64
 	ExpiresAt int64
 }
@@ -39,10 +35,13 @@ func NewBodyLimit(limit int64) MiddlewareFunc {
 }
 
 // Protect Server against Abuse by Limiting the amount of incoming requests
-func NewRatelimit(o *RatelimitOptions) MiddlewareFunc {
+func NewRatelimit(limit int64, period time.Duration) MiddlewareFunc {
+
+	periodSeconds := int64(period.Seconds())
+	limitInteger := strconv.FormatInt(limit, 10)
 
 	var mtx sync.Mutex
-	var data = make(map[string]*RatelimitEntry, 1024)
+	var data = make(map[string]*ratelimitEntry, 1024)
 
 	// Cleanup Internval
 	interval := time.NewTicker(time.Minute)
@@ -72,10 +71,7 @@ func NewRatelimit(o *RatelimitOptions) MiddlewareFunc {
 			delete(data, key)
 			ok = false
 		} else if !ok {
-			e = &RatelimitEntry{
-				Usage:     1,
-				ExpiresAt: now + int64(o.Period.Seconds()),
-			}
+			e = &ratelimitEntry{1, now + periodSeconds}
 			data[key] = e
 		} else {
 			e.Usage++
@@ -84,14 +80,14 @@ func NewRatelimit(o *RatelimitOptions) MiddlewareFunc {
 		// Append Headers
 		var (
 			ttl       = max(e.ExpiresAt-now, 0)
-			remaining = max(o.Limit-e.Usage, 0)
+			remaining = max(limit-e.Usage, 0)
 		)
 		w.Header().Set("X-Ratelimit-Remaining", strconv.FormatInt(remaining, 10))
 		w.Header().Set("X-Ratelimit-Reset", strconv.FormatInt(ttl, 10))
-		w.Header().Set("X-Ratelimit-Limit", strconv.FormatInt(o.Limit, 10))
+		w.Header().Set("X-Ratelimit-Limit", limitInteger)
 
 		// Enforce Limits
-		if e.Usage > o.Limit {
+		if e.Usage > limit {
 			SendClientError(w, r, ERROR_GENERIC_RATELIMIT)
 			return false
 		}
