@@ -1,0 +1,14 @@
+.-----------------------------------------------------------------------------.
+|                              dsoob.net Project                              |
+|                 (c) 2025 bakonpancakz. All Rights Reserved.                 |
+'-----------------------------------------------------------------------------'
+
+-------------------------------------------------------------------------------
+DIRECTORIES
+-------------------------------------------------------------------------------
+
+auth:       Central Login Server
+website:    Landing page mainly for marketing
+server:     Self-hosted server instance
+desktop:    Desktop Client and Tools for Windows and Mac
+mobile:     Mobile Client for Android and iOS
