@@ -56,10 +56,7 @@ func DELETE_Users_Me(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 	go func() {
-		ctx, cancel := tools.NewContext()
-		defer cancel()
-
-		if err := tools.StorageDelete(ctx, imagePaths...); err != nil {
+		if err := tools.StoragePublicDelete(imagePaths...); err != nil {
 			tools.LoggerStorage.Data(tools.ERROR, "Failed to Delete Account Images", map[string]any{
 				"paths": imagePaths,
 				"error": err.Error(),

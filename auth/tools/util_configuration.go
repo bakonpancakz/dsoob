@@ -22,7 +22,6 @@ const (
 	EPOCH_SECONDS                            = EPOCH_MILLI / 1000  // Generic EPOCH in Seconds
 	CONTEXT_TIMEOUT                          = 10 * time.Second    // Default Context Timeout
 	SHUTDOWN_TIMEOUT                         = 1 * time.Minute     // Default Shutdown Timeout
-	LIFETIME_METADATA_CACHE                  = 10 * time.Minute    // Lifetime for Metadata File
 	LIFETIME_TOKEN_USER_ELEVATION            = 10 * time.Minute    // Lifetime for User Elevation
 	LIFETIME_TOKEN_USER_COOKIE               = 30 * 24 * time.Hour // Lifetime for User Cookie
 	LIFETIME_TOKEN_EMAIL_PASSCODE            = 15 * time.Minute    // Lifetime for MFA Passcode
@@ -38,28 +37,24 @@ const (
 )
 
 var (
-	DATA_DIRECTORY        = EnvString("DATA_DIRECTORY", "./data")
-	EMAIL_SMTP_HOST       = EnvString("EMAIL_SMTP_HOST", "127.0.0.1")
-	EMAIL_SMTP_ADDRESS    = EnvString("EMAIL_SMTP_ADDRESS", "noreply@example.org")
-	STORAGE_S3_KEY_SECRET = EnvString("STORAGE_S3_KEY_SECRET", "xyz")
-	STORAGE_S3_KEY_ACCESS = EnvString("STORAGE_S3_KEY_ACCESS", "123")
-	STORAGE_S3_ENDPOINT   = EnvString("STORAGE_S3_ENDPOINT", "https://bucket.s3.region.host.tld")
-	STORAGE_S3_REGION     = EnvString("STORAGE_S3_REGION", "region")
-	STORAGE_S3_BUCKET     = EnvString("STORAGE_S3_BUCKET", "bucket")
-	HTTP_ADDRESS          = EnvString("HTTP_ADDRESS", "127.0.0.1:8080")
-	HTTP_IP_HEADERS       = EnvSlice("HTTP_IP_HEADERS", ",", []string{"X-Forwarded-For"})
-	HTTP_IP_PROXIES       = EnvSlice("HTTP_IP_PROXIES", ",", []string{"127.0.0.1/8"})
-	HTTP_TLS_ENABLED      = EnvString("HTTP_TLS_ENABLED", "false") == "true"
-	HTTP_TLS_CERT         = EnvString("HTTP_TLS_CERT", "tls_crt.pem")
-	HTTP_TLS_KEY          = EnvString("HTTP_TLS_KEY", "tls_key.pem")
-	HTTP_TLS_CA           = EnvString("HTTP_TLS_CA", "tls_ca.pem")
-	HTTP_KEY              = []byte(EnvString("HTTP_KEY", "teto"))
+	DATA_DIRECTORY     = EnvString("DATA_DIRECTORY", "./data")
+	EMAIL_SMTP_HOST    = EnvString("EMAIL_SMTP_HOST", "127.0.0.1")
+	EMAIL_SMTP_ADDRESS = EnvString("EMAIL_SMTP_ADDRESS", "noreply@example.org")
+	HTTP_ADDRESS       = EnvString("HTTP_ADDRESS", "127.0.0.1:8080")
+	HTTP_IP_HEADERS    = EnvSlice("HTTP_IP_HEADERS", ",", []string{"X-Forwarded-For"})
+	HTTP_IP_PROXIES    = EnvSlice("HTTP_IP_PROXIES", ",", []string{"127.0.0.1/8"})
+	HTTP_TLS_ENABLED   = EnvString("HTTP_TLS_ENABLED", "false") == "true"
+	HTTP_TLS_CERT      = EnvString("HTTP_TLS_CERT", "tls_crt.pem")
+	HTTP_TLS_KEY       = EnvString("HTTP_TLS_KEY", "tls_key.pem")
+	HTTP_TLS_CA        = EnvString("HTTP_TLS_CA", "tls_ca.pem")
+	HTTP_KEY           = []byte(EnvString("HTTP_KEY", "teto"))
 )
 
 func init() {
 	// Create Directories
 	// 	This will cause fatal errors elsewhere so it's ok!
 	os.MkdirAll(path.Join(DATA_DIRECTORY), FILEMODE_PUBLIC)
+	os.MkdirAll(path.Join(DATA_DIRECTORY, "public"), FILEMODE_PUBLIC)
 	os.MkdirAll(path.Join(DATA_DIRECTORY, "settings"), FILEMODE_SECURE)
 	os.MkdirAll(path.Join(DATA_DIRECTORY, "database"), FILEMODE_SECURE)
 }

@@ -121,10 +121,8 @@ func ImageProcessor(o imageOptions, id int64, d []byte) (string, error) {
 	}
 
 	// Processing and Upload Formats
-	ctx, cancel := NewContext()
-	defer cancel()
-
 	imageHash := GenerateImageHash(d)
+	imagePath := path.Join(o.Folder, strconv.FormatInt(id, 10), imageHash)
 	for _, f := range o.Formats {
 
 		// Calculate Scaled Height and Width
@@ -149,12 +147,13 @@ func ImageProcessor(o imageOptions, id int64, d []byte) (string, error) {
 		decoderImage = cropped // speeds up next resize
 
 		// Encode Image
-		output := bytes.Buffer{}
-		path := path.Join(o.Folder, strconv.FormatInt(id, 10), imageHash, f.Name)
-		if err := jpeg.Encode(&output, cropped, &jpeg.Options{Quality: 100}); err != nil {
-			return imageHash, err
+		output, err := StoragePublicCreate(imagePath, f.Name, FILEMODE_PUBLIC)
+		if err != nil {
+			return "", err
 		}
-		if err := StoragePut(ctx, path, ImageContentType, output.Bytes()); err != nil {
+		defer output.Close()
+
+		if err := jpeg.Encode(output, cropped, &jpeg.Options{Quality: 100}); err != nil {
 			return imageHash, err
 		}
 	}

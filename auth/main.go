@@ -42,7 +42,6 @@ func main() {
 	for _, fn := range []func(stop context.Context, await *sync.WaitGroup){
 		tools.GeolocateSetup,
 		tools.DatabaseSetup,
-		tools.StorageSetup,
 	} {
 		syncWg.Add(1)
 		go func() {

@@ -34,11 +34,8 @@ func DELETE_Users_Me_Banner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	go func() {
-		ctx, cancel := tools.NewContext()
-		defer cancel()
-
 		paths := tools.ImagePaths(tools.ImageOptionsBanners, session.UserID, *BannerHash)
-		if err := tools.StorageDelete(ctx, paths...); err != nil {
+		if err := tools.StoragePublicDelete(paths...); err != nil {
 			tools.LoggerStorage.Data(tools.ERROR, "Failed to Delete Profile Banner", map[string]any{
 				"paths": paths,
 				"error": err.Error(),
