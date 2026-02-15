@@ -1,0 +1,14 @@
+[ {{ .Host }} ]
+
+Goodbye User,
+
+Your account has been deleted for the following reason:
+
+{{ .Data.Reason }}
+
+Note: Data on self-hosted bonfires is managed by their owners and may not be deleted.
+
+This action is final and cannot be undone.
+
+  \_/
+() _ ) <( ... )

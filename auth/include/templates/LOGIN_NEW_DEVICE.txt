@@ -1,0 +1,13 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+A new device has logged into your account, you may review it below:
+
+Timestamp: {{ .Data.Timestamp }}
+IP Address: {{ .Data.IpAddress }}
+Location: {{ .Data.DeviceLocation }}
+Device: {{ .Data.DeviceBrowser }}
+
+  \_/
+()o_o) <( You can log out devices via the security page in settings! )

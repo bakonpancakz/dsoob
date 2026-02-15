@@ -1,0 +1,17 @@
+[ {{ .Host }} ]
+
+Hello User,
+
+Someone has attempted to access your account from a new location, clicking the link below will allow this device to log in.
+
+If this request wasn't made by you, your password may have been compromised and should be changed as soon as possible.
+
+Timestamp: {{ .Data.Timestamp }}
+IP Address: {{ .Data.IpAddress }}
+Location: {{ .Data.DeviceLocation }}
+Device: {{ .Data.DeviceBrowser }}
+
+https://{{ .Host }}/verify-login?token={{ .Token }}
+
+  \_/
+()o_o) <( You can change your password via the security page in settings! )
