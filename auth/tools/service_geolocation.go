@@ -91,7 +91,7 @@ func GeolocateSetup(stop context.Context, await *sync.WaitGroup) {
 	// Debugging
 	LoggerGeolocation.Log(INFO,
 		"Parsed %d IPV4 Ranges, %d IPV6 Ranges, and %d Strings",
-		len(entriesIPV4), len(entriesIPV4), len(entriesText),
+		len(entriesIPV4), len(entriesIPV6), len(entriesText),
 	)
 	LoggerGeolocation.Log(INFO, "Ready in %s", time.Since(t))
 }
