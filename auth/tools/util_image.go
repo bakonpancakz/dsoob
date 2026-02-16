@@ -25,35 +25,23 @@ type imageOptions struct {
 }
 
 type imageFormat struct {
-	Name   string
-	Height int
-	Width  int
+	Name    string
+	Height  int
+	Width   int
+	Quality int
 }
 
 var (
-	ImageContentType    = "image/jpeg"
 	ErrImageMalformed   = errors.New("malformed image data")
 	ErrImageUnsupported = errors.New("unsupported image format")
-
-	ImageOptionsAvatars = imageOptions{
-		Folder: "avatars",
-		Formats: []imageFormat{
-			{Name: "lg.jpeg", Height: 256, Width: 256},
-			{Name: "md.jpeg", Height: 128, Width: 128},
-			{Name: "sm.jpeg", Height: 64, Width: 64},
-		},
-	}
-	ImageOptionsBanners = imageOptions{
-		Folder: "banners",
-		Formats: []imageFormat{
-			{Name: "md.jpeg", Height: 200, Width: 600},
-			{Name: "sm.jpeg", Height: 100, Width: 300},
-		},
-	}
-	ImageOptions = map[string]imageOptions{
-		ImageOptionsAvatars.Folder: ImageOptionsAvatars,
-		ImageOptionsBanners.Folder: ImageOptionsBanners,
-	}
+	ImageOptionsAvatars = imageOptions{"avatars", []imageFormat{
+		{"lg.jpeg", 144, 144, 80},
+		{"md.jpeg", 96, 96, 50},
+		{"sm.jpeg", 48, 48, 25},
+	}}
+	ImageOptionsBanners = imageOptions{"banners", []imageFormat{
+		{"lg.jpeg", 160, 480, 90},
+	}}
 )
 
 // Return Paths for Images that would be generated using the given options
@@ -137,7 +125,7 @@ func ImageProcessor(o imageOptions, id int64, d []byte) (string, error) {
 
 		// Resize Image
 		scaled := image.NewRGBA(image.Rect(0, 0, sw, sh))
-		draw.CatmullRom.Scale(scaled, scaled.Bounds(), decoderImage, bounds, draw.Over, nil)
+		draw.BiLinear.Scale(scaled, scaled.Bounds(), decoderImage, bounds, draw.Over, nil)
 
 		// Crop Image
 		offsetX := (sw - f.Width) / 2
@@ -153,7 +141,7 @@ func ImageProcessor(o imageOptions, id int64, d []byte) (string, error) {
 		}
 		defer output.Close()
 
-		if err := jpeg.Encode(output, cropped, &jpeg.Options{Quality: 100}); err != nil {
+		if err := jpeg.Encode(output, cropped, &jpeg.Options{Quality: f.Quality}); err != nil {
 			return imageHash, err
 		}
 	}

@@ -29,6 +29,10 @@ func main() {
 			core.DebugEmailRenderTemplates()
 			return
 		}
+		if strings.EqualFold(str, "debug_image_resizer") {
+			core.DebugImageResizer()
+			return
+		}
 	}
 
 	// Startup Services
