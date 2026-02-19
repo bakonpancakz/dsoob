@@ -21,9 +21,9 @@ var (
 	hashSemaphore = make(chan struct{}, PASSWORD_CONCURRENT_LIMIT)
 )
 
-// Picks a Random Number between 0-999999 for One-Time Passcodes
+// Picks a Random Number between for Email One-Time Passcodes
 func GeneratePasscode() string {
-	n, _ := rand.Int(rand.Reader, big.NewInt(999999))
+	n, _ := rand.Int(rand.Reader, big.NewInt(1000000))
 	return fmt.Sprintf("%06d", n)
 }
 
