@@ -1,7 +1,9 @@
-PRAGMA journal_mode=WAL;
-PRAGMA synchronous=NORMAL;
-PRAGMA foreign_keys=ON;
-PRAGMA cache_size=-64000;
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = FULL;
+PRAGMA temp_store = MEMORY;
+PRAGMA cache_size = -64000;
+PRAGMA busy_timeout = 10000;
+PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS user (
     id                  INTEGER         NOT NULL PRIMARY KEY,                       -- Account ID
@@ -45,10 +47,12 @@ CREATE TABLE IF NOT EXISTS user_session (
     created             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,         -- Created At
     updated             TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,         -- Updated At
     user_id             INTEGER         NOT NULL,                                   -- Relevant User ID
-    token               TEXT            UNIQUE,                                     -- Session Token
+    token               TEXT            NOT NULL UNIQUE,                            -- Session Token
     elevated_until      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,         -- Elevated Until UNIX Timestamp
     device_ip_address   TEXT            NOT NULL,                                   -- IP Address of Device
     device_user_agent   TEXT            NOT NULL,                                   -- User Agent of Device
     device_public_key   TEXT            NOT NULL,                                   -- Device Public Key
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
+
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON user_session (user_id);
