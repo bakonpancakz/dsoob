@@ -17,6 +17,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	hashSemaphore = make(chan struct{}, PASSWORD_CONCURRENT_LIMIT)
+)
+
 // Picks a Random Number between 0-999999 for One-Time Passcodes
 func GeneratePasscode() string {
 	n, _ := rand.Int(rand.Reader, big.NewInt(999999))
@@ -79,6 +83,9 @@ func CompareSignedString(givenString string) bool {
 
 // Wrapper to Hash Password with Predefined Effort
 func GeneratePasswordHash(givenPassword string) (string, error) {
+	hashSemaphore <- struct{}{}
+	defer func() { <-hashSemaphore }()
+
 	hashBytes, err := bcrypt.GenerateFromPassword(
 		[]byte(givenPassword),
 		PASSWORD_HASH_EFFORT,
@@ -91,6 +98,9 @@ func GeneratePasswordHash(givenPassword string) (string, error) {
 
 // Wrapper to Compare Password Against Given String
 func ComparePasswordHash(givenHash, givenPassword string) (bool, error) {
+	hashSemaphore <- struct{}{}
+	defer func() { <-hashSemaphore }()
+
 	err := bcrypt.CompareHashAndPassword(
 		[]byte(givenHash),
 		[]byte(givenPassword),

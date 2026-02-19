@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +31,7 @@ const (
 	LIFETIME_TOKEN_EMAIL_RESET               = 24 * time.Hour      // Lifetime for Password Reset Token
 	PASSWORD_HASH_EFFORT                     = 12                  // Password Hashing Effort
 	PASSWORD_HISTORY_LIMIT                   = 5                   // Password History Length
+	PASSWORD_CONCURRENT_LIMIT                = 8                   // Password Hashing Concurrency Limit
 	MFA_PASSCODE_LENGTH                      = 6                   // TOTP Passcode String Length (Do Not Change)
 	MFA_RECOVERY_LENGTH                      = 8                   // TOTP Recovery Code Length (Do Not Change)
 	TOKEN_PREFIX_USER                        = "User "
@@ -37,17 +39,17 @@ const (
 )
 
 var (
-	DATA_DIRECTORY     = EnvString("DATA_DIRECTORY", "./data")
-	EMAIL_SMTP_HOST    = EnvString("EMAIL_SMTP_HOST", "127.0.0.1")
-	EMAIL_SMTP_ADDRESS = EnvString("EMAIL_SMTP_ADDRESS", "noreply@example.org")
-	HTTP_ADDRESS       = EnvString("HTTP_ADDRESS", "127.0.0.1:8080")
-	HTTP_IP_HEADERS    = EnvSlice("HTTP_IP_HEADERS", ",", []string{"X-Forwarded-For"})
-	HTTP_IP_PROXIES    = EnvSlice("HTTP_IP_PROXIES", ",", []string{"127.0.0.1/8"})
-	HTTP_TLS_ENABLED   = EnvString("HTTP_TLS_ENABLED", "false") == "true"
-	HTTP_TLS_CERT      = EnvString("HTTP_TLS_CERT", "tls_crt.pem")
-	HTTP_TLS_KEY       = EnvString("HTTP_TLS_KEY", "tls_key.pem")
-	HTTP_TLS_CA        = EnvString("HTTP_TLS_CA", "tls_ca.pem")
-	HTTP_KEY           = []byte(EnvString("HTTP_KEY", "teto"))
+	DATA_DIRECTORY     = envString("DATA_DIRECTORY", "./data")
+	EMAIL_SMTP_HOST    = envString("EMAIL_SMTP_HOST", "127.0.0.1")
+	EMAIL_SMTP_ADDRESS = envString("EMAIL_SMTP_ADDRESS", "noreply@example.org")
+	HTTP_ADDRESS       = envString("HTTP_ADDRESS", "127.0.0.1:8080")
+	HTTP_IP_HEADERS    = envSlice("HTTP_IP_HEADERS", ",", []string{"X-Forwarded-For"})
+	HTTP_IP_PROXIES    = envSlice("HTTP_IP_PROXIES", ",", []string{"127.0.0.1/8"})
+	HTTP_TLS_ENABLED   = envString("HTTP_TLS_ENABLED", "false") == "true"
+	HTTP_TLS_CERT      = envString("HTTP_TLS_CERT", "tls_crt.pem")
+	HTTP_TLS_KEY       = envString("HTTP_TLS_KEY", "tls_key.pem")
+	HTTP_TLS_CA        = envString("HTTP_TLS_CA", "tls_ca.pem")
+	HTTP_KEY           = []byte(envString("HTTP_KEY", "teto"))
 )
 
 func init() {
@@ -92,7 +94,7 @@ func NewTLSConfig(certPath, keyPath, caPath string) (*tls.Config, error) {
 }
 
 // Read String from Environment
-func EnvString(field, initial string) string {
+func envString(field, initial string) string {
 	if value := os.Getenv(field); value == "" {
 		return initial
 	} else {
@@ -101,10 +103,21 @@ func EnvString(field, initial string) string {
 }
 
 // Read String from Environment and Parse it as a slice using the given delimiter
-func EnvSlice(field, delimiter string, initial []string) []string {
+func envSlice(field, delimiter string, initial []string) []string {
 	if value := os.Getenv(field); value == "" {
 		return initial
 	} else {
 		return strings.Split(value, delimiter)
+	}
+}
+
+// Read String from Environment and Parse it as a number
+func envNumber(field string, initial int) int {
+	if value := os.Getenv(field); value == "" {
+		return initial
+	} else if number, err := strconv.Atoi(value); err != nil {
+		return initial
+	} else {
+		return number
 	}
 }
