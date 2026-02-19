@@ -93,6 +93,9 @@ func SetupMux() *http.ServeMux {
 	mux.Handle("/users/bulk", tools.MethodHandler{
 		http.MethodPost: tools.Chain(routes.POST_Users_Bulk, ratePublicRead),
 	})
+	mux.Handle("/users/{id}/keychain", tools.MethodHandler{
+		http.MethodPost: tools.Chain(routes.GET_Users_ID_Keychain, ratePublicRead),
+	})
 
 	// Default 404 Handler
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

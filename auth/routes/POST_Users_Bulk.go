@@ -20,22 +20,19 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 	// Fetch Users
 	rows, err := tools.Database.QueryContext(ctx, `
 		SELECT
-			u.id,
-			u.created,
-			u.username,
-			u.displayname,
-			u.subtitle,
-			u.biography,
-			u.avatar_hash,
-			u.banner_hash,
-			u.accent_banner,
-			u.accent_border,
-			u.accent_background,
-			COALESCE(ARRAY_AGG(s.device_public_key) FILTER (WHERE s.user_id IS NOT NULL), '{}') AS keys
-		FROM user u
-		LEFT JOIN user_session s ON s.user_id = u.id
-		WHERE u.id = ANY($1)
-		GROUP BY u.id;`,
+			id,
+			created,
+			username,
+			displayname,
+			subtitle,
+			biography,
+			avatar_hash,
+			banner_hash,
+			accent_banner,
+			accent_border,
+			accent_background
+		FROM user
+		WHERE id = ANY($1)`,
 		Body.UserIDs,
 	)
 	if err != nil {
@@ -57,7 +54,6 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 		UserAccentBanner     *int
 		UserAccentBorder     *int
 		UserAccentBackground *int
-		UserPublicKeys       []string
 	)
 	for rows.Next() {
 		if err := rows.Scan(
@@ -72,7 +68,6 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 			&UserAccentBanner,
 			&UserAccentBorder,
 			&UserAccentBackground,
-			&UserPublicKeys,
 		); err != nil {
 			tools.SendServerError(w, r, err)
 			return
@@ -90,7 +85,6 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 			"accent_banner":     UserAccentBanner,
 			"accent_border":     UserAccentBorder,
 			"accent_background": UserAccentBackground,
-			"public_keys":       UserPublicKeys,
 		})
 
 	}
