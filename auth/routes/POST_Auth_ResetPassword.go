@@ -17,8 +17,6 @@ func POST_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Update User
 	var (
@@ -27,7 +25,7 @@ func POST_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 		UserID               int64
 		UserEmailAddress     string
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
 			token_reset_eat = $1,

@@ -9,11 +9,9 @@ import (
 func POST_Auth_Logout(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Revoke Current Session
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		"DELETE FROM user_session WHERE id = $1 AND user_id = $2",
 		session.SessionID,
 		session.UserID,

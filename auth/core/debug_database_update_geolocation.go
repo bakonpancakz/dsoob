@@ -108,7 +108,7 @@ func download(code, filename, token string) (fs.File, error) {
 func DebugDatabaseUpdateGeolocation() {
 	t := time.Now()
 	OUTPUT_FILE := "./include/DatabaseGeolocate.kani.gz"
-	REQUEST_KEY := tools.EnvString("API_KEY_IP2LOCATION", "")
+	REQUEST_KEY := os.Getenv("API_KEY_IP2LOCATION")
 	if REQUEST_KEY == "" {
 		tools.LoggerGeolocation.Log(tools.FATAL,
 			"Environment Variable API_KEY_IP2LOCATION was not set")

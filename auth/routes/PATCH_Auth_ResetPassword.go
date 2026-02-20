@@ -18,8 +18,6 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch User
 	var (
@@ -27,9 +25,14 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 		UserEmailAddress       string
 		UserPasswordHistoryRAW string
 	)
-	err := tools.Database.
-		QueryRowContext(ctx, "SELECT id, email_address, password_history FROM user WHERE token_reset = $1 AND token_reset_eat > NOW()", Body.Token).
-		Scan(&UserID, &UserEmailAddress, &UserPasswordHistoryRAW)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT id, email_address, password_history FROM user WHERE token_reset = $1 AND token_reset_eat > NOW()",
+		Body.Token,
+	).Scan(
+		&UserID,
+		&UserEmailAddress,
+		&UserPasswordHistoryRAW,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return
@@ -61,7 +64,7 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update User
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated 		 = CURRENT_TIMESTAMP,
 			token_reset 	 = NULL,

@@ -14,11 +14,9 @@ func POST_Auth_VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Update User
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated 		 = CURRENT_TIMESTAMP,
 			email_verified   = TRUE,

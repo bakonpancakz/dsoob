@@ -12,8 +12,6 @@ import (
 func GET_Users_Me(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch User
 	var (
@@ -32,7 +30,7 @@ func GET_Users_Me(w http.ResponseWriter, r *http.Request) {
 		UserAccentBorder     *int
 		UserAccentBackground *int
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
 			id, created, email_address, email_verified, mfa_enabled,
 			username, displayname, subtitle, biography,

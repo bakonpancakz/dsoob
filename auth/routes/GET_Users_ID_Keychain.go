@@ -12,11 +12,8 @@ func GET_Users_ID_Keychain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := tools.NewContext()
-	defer cancel()
-
 	// Fetch Sessions
-	rows, err := tools.Database.QueryContext(ctx,
+	rows, err := tools.Database.QueryContext(r.Context(),
 		"SELECT device_public_key FROM user_session WHERE user_id = $1",
 		userID,
 	)

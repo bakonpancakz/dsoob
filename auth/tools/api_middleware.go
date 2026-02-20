@@ -104,14 +104,12 @@ func UseSession(w http.ResponseWriter, r *http.Request) bool {
 
 	// User Prefix
 	case strings.HasPrefix(h, TOKEN_PREFIX_USER):
-		ctx, cancel := NewContext()
-		defer cancel()
 
 		// Retrieve User Session
 		var session SessionData
 		var sessionElevatedUntil time.Time
 
-		err := Database.QueryRowContext(ctx,
+		err := Database.QueryRowContext(r.Context(),
 			"SELECT id, user_id, elevated_until FROM user_session WHERE token = $1",
 			strings.TrimPrefix(h, TOKEN_PREFIX_USER),
 		).Scan(

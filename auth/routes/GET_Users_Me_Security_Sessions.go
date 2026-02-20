@@ -9,12 +9,10 @@ import (
 func GET_Users_Me_Security_Sessions(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch Sessions
-	rows, err := tools.Database.QueryContext(ctx,
-		`SELECT id, device_ip_address, device_user_agent, device_public_key FROM user_session WHERE user_id = $1`,
+	rows, err := tools.Database.QueryContext(r.Context(),
+		"SELECT id, device_ip_address, device_user_agent, device_public_key FROM user_session WHERE user_id = $1",
 		session.UserID,
 	)
 	if err != nil {

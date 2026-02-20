@@ -56,11 +56,8 @@ func PUT_Users_Me_Avatar(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Update User
-	ctx, cancel := tools.NewContext()
-	defer cancel()
-
 	var PreviousHash *string
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE dsoob.profiles SET
 			updated     = CURRENT_TIMESTAMP,
 			avatar_hash = $1

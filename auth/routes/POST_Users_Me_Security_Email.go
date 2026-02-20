@@ -12,8 +12,6 @@ import (
 func POST_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Update User
 	var (
@@ -21,7 +19,7 @@ func POST_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 		UserEmailVerifyToken      = tools.GenerateSignedString()
 		UserEmailVerifyExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY)
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE user SET
 			updated 		 = CURRENT_TIMESTAMP,
 			token_verify 	 = $1,

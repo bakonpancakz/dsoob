@@ -15,8 +15,6 @@ func GET_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		tools.SendClientError(w, r, tools.ERROR_MFA_ESCALATION_REQUIRED)
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch User
 	var (
@@ -24,9 +22,14 @@ func GET_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		UserMFAEnabled   bool
 		UserName         string
 	)
-	err := tools.Database.
-		QueryRowContext(ctx, "SELECT email_address, mfa_enabled, username FROM user WHERE id = $1", session.UserID).
-		Scan(&UserEmailAddress, &UserMFAEnabled, &UserName)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT email_address, mfa_enabled, username FROM user WHERE id = $1",
+		session.UserID,
+	).Scan(
+		&UserEmailAddress,
+		&UserMFAEnabled,
+		&UserName,
+	)
 	if err != nil {
 		tools.SendServerError(w, r, err)
 		return
@@ -45,7 +48,7 @@ func GET_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		setupSecret,
 	)
 
-	if _, err = tools.Database.ExecContext(ctx,
+	if _, err = tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
 			mfa_enabled 	= false,

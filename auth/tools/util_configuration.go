@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -59,11 +58,6 @@ func init() {
 	os.MkdirAll(path.Join(DATA_DIRECTORY, "public"), FILEMODE_PUBLIC)
 	os.MkdirAll(path.Join(DATA_DIRECTORY, "settings"), FILEMODE_SECURE)
 	os.MkdirAll(path.Join(DATA_DIRECTORY, "database"), FILEMODE_SECURE)
-}
-
-// Default Context Timeout
-func NewContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), CONTEXT_TIMEOUT)
 }
 
 // Create TLS Configuration from Crypto

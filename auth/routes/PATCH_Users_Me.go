@@ -10,10 +10,6 @@ import (
 
 func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 
-	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
-
 	var Body struct {
 		Displayname      *string `json:"displayname" validate:"omitempty,displayname"`
 		Subtitle         *string `json:"subtitle" validate:"omitempty,displayname"`
@@ -25,6 +21,7 @@ func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
+	session := tools.GetSession(r)
 
 	// Fetch User
 	var (
@@ -38,7 +35,7 @@ func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 		UserAccentBorder     *int
 		UserAccentBackground *int
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
 			username,
 			displayname,
@@ -127,7 +124,7 @@ func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update User
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE dsoob.profiles SET
 			updated 		  = CURRENT_TIMESTAMP,
 			displayname 	  = $1,

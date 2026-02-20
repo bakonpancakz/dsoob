@@ -14,12 +14,10 @@ func DELETE_Users_Me_Security_MFA_Codes(w http.ResponseWriter, r *http.Request) 
 		tools.SendClientError(w, r, tools.ERROR_MFA_ESCALATION_REQUIRED)
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Regenerate Recovery Codes
 	recoveryCodes := tools.GenerateRecoveryCodes()
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE dsoob.users SET
 			updated 		= CURRENT_TIMESTAMP,
 			mfa_codes 		= $1,

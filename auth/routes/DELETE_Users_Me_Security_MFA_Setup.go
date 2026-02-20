@@ -13,11 +13,9 @@ func DELETE_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) 
 		tools.SendClientError(w, r, tools.ERROR_MFA_ESCALATION_REQUIRED)
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Reset Fields
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
 			mfa_enabled 	= false,

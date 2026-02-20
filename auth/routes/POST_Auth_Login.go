@@ -21,8 +21,6 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Find Relevant Account
 	var (
@@ -36,7 +34,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 		UserMFACodesUsed  int
 		UserPasswordHash  *string
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
 			id, email_address, email_verified, ip_address,
 			mfa_enabled, mfa_secret, mfa_codes, mfa_codes_used,
@@ -112,7 +110,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Mark Recovery Code as Used
-					if _, err := tools.Database.ExecContext(ctx,
+					if _, err := tools.Database.ExecContext(r.Context(),
 						"UPDATE user SET mfa_codes_used = mfa_codes_used | $1 WHERE id = $2",
 						(1 << i),
 						UserID,
@@ -144,7 +142,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 
 		// Generate Token
 		var UserLoginVerifyToken = tools.GenerateSignedString()
-		tag, err := tools.Database.ExecContext(ctx,
+		tag, err := tools.Database.ExecContext(r.Context(),
 			`UPDATE user SET
 				updated 		 = CURRENT_TIMESTAMP,
 				token_login 	 = $1,
@@ -185,7 +183,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update User
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated    = CURRENT_TIMESTAMP,
 			ip_address = $1
@@ -206,7 +204,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create Session
-	_, err = tools.Database.ExecContext(ctx,
+	_, err = tools.Database.ExecContext(r.Context(),
 		`INSERT INTO user_session (
 			id, created, user_id, token, device_ip_address, device_user_agent, device_public_key
 		) VALUES ($1, $2, $3, $4, $5, $6, $7)`,

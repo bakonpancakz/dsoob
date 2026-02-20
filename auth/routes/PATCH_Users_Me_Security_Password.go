@@ -18,10 +18,7 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch Account Password Fields
 	var (
@@ -29,9 +26,14 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 		UserPasswordHash       *string
 		UserPasswordHistoryRAW string
 	)
-	err := tools.Database.
-		QueryRowContext(ctx, `SELECT email_address, password_hash, password_history FROM user WHERE id = $1`, session.UserID).
-		Scan(&UserEmailAddress, &UserPasswordHash, &UserPasswordHistoryRAW)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT email_address, password_hash, password_history FROM user WHERE id = $1",
+		session.UserID,
+	).Scan(
+		&UserEmailAddress,
+		&UserPasswordHash,
+		&UserPasswordHistoryRAW,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return
@@ -76,7 +78,7 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update User
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated			 = CURRENT_TIMESTAMP,
 			password_hash	 = $1,

@@ -14,17 +14,19 @@ func GET_Users_Me_Security_MFA_Codes(w http.ResponseWriter, r *http.Request) {
 		tools.SendClientError(w, r, tools.ERROR_MFA_ESCALATION_REQUIRED)
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch User
 	var (
 		UserMFAEnabled  bool
 		UserMFACodesRAW string
 	)
-	err := tools.Database.
-		QueryRowContext(ctx, "SELECT mfa_enabled, mfa_codes FROM user WHERE id = $1", session.UserID).
-		Scan(&UserMFAEnabled, &UserMFACodesRAW)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT mfa_enabled, mfa_codes FROM user WHERE id = $1",
+		session.UserID,
+	).Scan(
+		&UserMFAEnabled,
+		&UserMFACodesRAW,
+	)
 	if err != nil {
 		tools.SendServerError(w, r, err)
 		return

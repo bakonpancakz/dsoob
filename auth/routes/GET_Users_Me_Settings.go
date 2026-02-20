@@ -14,7 +14,10 @@ func GET_Users_Me_Settings(w http.ResponseWriter, r *http.Request) {
 	session := tools.GetSession(r)
 
 	// Fetch File
-	filepath := path.Join(tools.DATA_DIRECTORY, "settings", strconv.FormatInt(session.UserID, 10)+".raw")
+	filepath := path.Join(
+		tools.DATA_DIRECTORY, "settings",
+		strconv.FormatInt(session.UserID, 10)+".raw",
+	)
 	raw, err := os.ReadFile(filepath)
 	if os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNoContent)

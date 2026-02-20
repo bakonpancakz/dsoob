@@ -24,14 +24,14 @@ func PATCH_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := tools.NewContext()
-	defer cancel()
-
 	// Duplicate Check
 	var UsageEmail int
-	err := tools.Database.
-		QueryRowContext(ctx, "SELECT COUNT(*) FROM user WHERE email_address = LOWER($1)", Body.Email).
-		Scan(&UsageEmail)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT COUNT(*) FROM user WHERE email_address = LOWER($1)",
+		Body.Email,
+	).Scan(
+		&UsageEmail,
+	)
 	if err != nil {
 		tools.SendServerError(w, r, err)
 		return
@@ -48,7 +48,7 @@ func PATCH_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 		UserEmailVerifyExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY)
 	)
 	err = tools.Database.
-		QueryRowContext(ctx,
+		QueryRowContext(r.Context(),
 			`UPDATE user SET
 				updated			 	= CURRENT_TIMESTAMP,
 				email_verified 		= FALSE,

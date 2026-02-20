@@ -11,14 +11,15 @@ import (
 func DELETE_Users_Me_Avatar(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Update Account
 	var AvatarHash *string
-	err := tools.Database.
-		QueryRowContext(ctx, "UPDATE user SET avatar_hash = NULL WHERE id = $1 RETURNING avatar_hash", session.UserID).
-		Scan(&AvatarHash)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"UPDATE user SET avatar_hash = null WHERE id = $1 RETURNING avatar_hash",
+		session.UserID,
+	).Scan(
+		&AvatarHash,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return

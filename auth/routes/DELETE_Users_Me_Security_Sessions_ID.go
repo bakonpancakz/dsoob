@@ -17,11 +17,9 @@ func DELETE_Users_Me_Security_Sessions_ID(w http.ResponseWriter, r *http.Request
 	if !ok {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Delete Relevant Session
-	tag, err := tools.Database.ExecContext(ctx,
+	tag, err := tools.Database.ExecContext(r.Context(),
 		"DELETE FROM user WHERE id = $1 AND user_id = $2",
 		snowflake,
 		session.UserID,

@@ -20,8 +20,6 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch Account with MFA Fields
 	var (
@@ -35,7 +33,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 		UserEmailPasscode           *string
 		UserEmailPasscodeExpiration *time.Time
 	)
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
 			email_address, email_verified, mfa_enabled,
 			mfa_secret, mfa_codes, mfa_codes_used,
@@ -96,7 +94,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Mark Recovery Code as Used
-					if _, err := tools.Database.ExecContext(ctx,
+					if _, err := tools.Database.ExecContext(r.Context(),
 						"UPDATE user SET mfa_codes_used = mfa_codes_used | $1 WHERE id = $2",
 						(1 << i),
 						session.UserID,
@@ -132,7 +130,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 				NewPasscode           = tools.GeneratePasscode()
 				NewPasscodeExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_PASSCODE)
 			)
-			if _, err = tools.Database.ExecContext(ctx,
+			if _, err = tools.Database.ExecContext(r.Context(),
 				`UPDATE user SET
 					updated 		   = CURRENT_TIMESTAMP,
 					token_passcode 	   = $1,
@@ -190,7 +188,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 
 	// Mark Current Session as Elevated
 	elevatedUntil := time.Now().Add(tools.LIFETIME_TOKEN_USER_ELEVATION)
-	if _, err := tools.Database.ExecContext(ctx,
+	if _, err := tools.Database.ExecContext(r.Context(),
 		"UPDATE user_session SET elevated_until = $1 WHERE id = $2",
 		elevatedUntil,
 		session.SessionID,

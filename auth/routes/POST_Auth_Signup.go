@@ -17,15 +17,13 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Check for Duplicate Email or Username
 	var UsageUsername, UsageEmail int
-	if err := tools.Database.QueryRowContext(ctx,
+	if err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
-			(SELECT COUNT(*) FROM dsoob.profiles WHERE username 	 = LOWER($1)),
-			(SELECT COUNT(*) FROM user 	 WHERE email_address = LOWER($2))`,
+			(SELECT COUNT(*) FROM dsoob.profiles WHERE username = LOWER($1)),
+			(SELECT COUNT(*) FROM user WHERE email_address = LOWER($2))`,
 		Body.Username,
 		Body.Email,
 	).Scan(
@@ -54,7 +52,7 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 		tools.SendServerError(w, r, err)
 		return
 	}
-	if _, err := tools.Database.ExecContext(ctx,
+	if _, err := tools.Database.ExecContext(r.Context(),
 		`INSERT INTO user (
 			id,
 			email_address,

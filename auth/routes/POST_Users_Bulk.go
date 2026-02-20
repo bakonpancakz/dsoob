@@ -14,25 +14,14 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 	if !tools.BindJSON(w, r, &Body) {
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch Users
-	rows, err := tools.Database.QueryContext(ctx, `
-		SELECT
-			id,
-			created,
-			username,
-			displayname,
-			subtitle,
-			biography,
-			avatar_hash,
-			banner_hash,
-			accent_banner,
-			accent_border,
-			accent_background
-		FROM user
-		WHERE id = ANY($1)`,
+	rows, err := tools.Database.QueryContext(r.Context(),
+		`SELECT
+			id, created, username, displayname,
+			subtitle, biography, avatar_hash, banner_hash,
+			accent_banner, accent_border, accent_background
+		FROM user WHERE id = IN($1)`,
 		Body.UserIDs,
 	)
 	if err != nil {

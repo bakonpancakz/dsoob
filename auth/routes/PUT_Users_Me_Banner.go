@@ -56,11 +56,8 @@ func PUT_Users_Me_Banner(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Store updated image hash
-	ctx, cancel := tools.NewContext()
-	defer cancel()
-
 	var PreviousHash *string
-	err := tools.Database.QueryRowContext(ctx,
+	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE dsoob.profiles SET
 			updated 	= CURRENT_TIMESTAMP,
 			banner_hash = $1

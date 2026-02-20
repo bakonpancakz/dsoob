@@ -11,14 +11,15 @@ import (
 func DELETE_Users_Me_Banner(w http.ResponseWriter, r *http.Request) {
 
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Update Account
 	var BannerHash *string
-	err := tools.Database.
-		QueryRowContext(ctx, "UPDATE user SET banner_hash = NULL WHERE id = $1 RETURNING banner_hash", session.UserID).
-		Scan(&BannerHash)
+	err := tools.Database.QueryRowContext(r.Context(),
+		"UPDATE user SET banner_hash = NULL WHERE id = $1 RETURNING banner_hash",
+		session.UserID,
+	).Scan(
+		&BannerHash,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return

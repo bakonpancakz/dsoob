@@ -15,20 +15,19 @@ func POST_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session := tools.GetSession(r)
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Fetch User
 	var (
 		UserMFAEnabled bool
 		UserMFASecret  *string
 	)
-	if err := tools.Database.
-		QueryRowContext(ctx, "SELECT mfa_enabled, mfa_secret FROM user WHERE id = $1", session.UserID).
-		Scan(
-			&UserMFAEnabled,
-			&UserMFASecret,
-		); err != nil {
+	if err := tools.Database.QueryRowContext(r.Context(),
+		"SELECT mfa_enabled, mfa_secret FROM user WHERE id = $1",
+		session.UserID,
+	).Scan(
+		&UserMFAEnabled,
+		&UserMFASecret,
+	); err != nil {
 		tools.SendServerError(w, r, err)
 		return
 	}
@@ -46,7 +45,7 @@ func POST_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update User
-	if _, err := tools.Database.ExecContext(ctx,
+	if _, err := tools.Database.ExecContext(r.Context(),
 		"UPDATE user SET mfa_enabled = TRUE WHERE id = $1",
 		session.UserID,
 	); err != nil {

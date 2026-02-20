@@ -15,8 +15,6 @@ func DELETE_Users_Me(w http.ResponseWriter, r *http.Request) {
 		tools.SendClientError(w, r, tools.ERROR_MFA_ESCALATION_REQUIRED)
 		return
 	}
-	ctx, cancel := tools.NewContext()
-	defer cancel()
 
 	// Delete Relevant Account
 	var (
@@ -25,8 +23,8 @@ func DELETE_Users_Me(w http.ResponseWriter, r *http.Request) {
 		UserAvatarHash   *string
 		UserBannerHash   *string
 	)
-	err := tools.Database.QueryRowContext(ctx,
-		`DELETE FROM user WHERE id = $1 RETURNING id, email_address, avatar_hash, banner_hash`,
+	err := tools.Database.QueryRowContext(r.Context(),
+		"DELETE FROM user WHERE id = $1 RETURNING id, email_address, avatar_hash, banner_hash",
 		session.UserID,
 	).Scan(
 		&UserID,
