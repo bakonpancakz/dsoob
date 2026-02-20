@@ -47,15 +47,17 @@ func (p *LoggerInstance) Log(severity LoggerSeverity, format string, a ...any) {
 }
 
 func (p *LoggerInstance) Data(severity LoggerSeverity, message string, data any) {
-	entryData := "null"
-	if data != nil {
-		if b, err := json.Marshal(data); err != nil {
-			entryData = fmt.Sprintf("marshal_error:%q", err)
+	if data == nil {
+		p.entry(severity, p.source, message)
+	} else {
+		entryData := ""
+		if b, err := json.MarshalIndent(data, "", "  "); err != nil {
+			entryData = fmt.Sprintf("marshal_error: %q", err)
 		} else {
 			entryData = string(b)
 		}
+		p.entry(severity, p.source, fmt.Sprintf("%s\n%s\n---", message, entryData))
 	}
-	p.entry(severity, p.source, fmt.Sprintf("%s - %s", message, entryData))
 	if severity == FATAL {
 		os.Exit(1)
 	}

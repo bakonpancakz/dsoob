@@ -90,10 +90,21 @@ func setupEmailTemplate[L any](filename, subjectLine string) func(toAddress stri
 		fmt.Fprintf(&envelope, "--%s--\r\n", boundary)
 
 		err := smtp.SendMail(EMAIL_SMTP_HOST, nil, EMAIL_SMTP_ADDRESS, []string{toAddress}, envelope.Bytes())
+		errObject := map[string]any{}
+		if err != nil {
+			errObject["message"] = err.Error()
+			errObject["error"] = err
+		}
+
 		LoggerEmail.Data(INFO, "Email Info", map[string]any{
-			"address":  toAddress,
-			"template": filename,
-			"error":    err,
+			"template": map[string]any{
+				"filename": filename,
+				"literals": literals,
+			},
+			"destination": map[string]any{
+				"email_address": toAddress,
+			},
+			"error": errObject,
 		})
 
 	}

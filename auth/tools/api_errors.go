@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
 type APIError struct {
@@ -58,13 +59,32 @@ func SendClientError(w http.ResponseWriter, r *http.Request, e APIError) {
 
 // Cancel Request and Respond with a Generic Server Error
 func SendServerError(w http.ResponseWriter, r *http.Request, err error) {
+
+	debugStack := strings.Split(string(debug.Stack()), "\n")
+	for i, item := range debugStack {
+		debugStack[i] = strings.ReplaceAll(item, "\t", "    ")
+	}
+	if len(debugStack) > 5 {
+		debugStack = debugStack[5:] //skip header
+	}
+
+	reqHeader := make(map[string]string, len(r.Header))
+	for key, header := range r.Header {
+		reqHeader[key] = strings.Join(header, ", ")
+	}
+
 	LoggerHTTP.Data(ERROR, err.Error(), map[string]any{
-		"stack":   string(debug.Stack()),
-		"method":  r.Method,
-		"url":     r.URL.String(),
-		"headers": r.Header,
-		"session": r.Context().Value(SESSION_KEY),
-		"error":   err,
+		"request": map[string]any{
+			"method":  r.Method,
+			"url":     r.URL.String(),
+			"headers": reqHeader,
+			"session": r.Context().Value(SESSION_KEY),
+		},
+		"error": map[string]any{
+			"raw":     err,
+			"message": err.Error(),
+			"stack":   debugStack,
+		},
 	})
 	SendClientError(w, r, ERROR_GENERIC_SERVER)
 }
