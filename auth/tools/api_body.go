@@ -5,7 +5,6 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -119,7 +118,6 @@ func BindJSON(w http.ResponseWriter, r *http.Request, b any) bool {
 
 	// Struct Validation
 	if err := BodyValidator.Struct(b); err != nil {
-		fmt.Println("DELETE ME", err)
 		SendClientError(w, r, ERROR_BODY_INVALID_FIELD)
 		return false
 	}
