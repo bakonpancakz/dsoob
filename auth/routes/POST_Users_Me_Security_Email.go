@@ -16,8 +16,8 @@ func POST_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 	// Update User
 	var (
 		UserEmailAddress          string
-		UserEmailVerifyToken      = tools.GenerateSignedString()
-		UserEmailVerifyExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY)
+		UserEmailVerifyToken      = tools.GenerateTokenString()
+		UserEmailVerifyExpiration = time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_VERIFY)
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE user SET

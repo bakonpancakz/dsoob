@@ -18,7 +18,7 @@ func DebugEmailRenderTemplates() {
 
 	var (
 		exampleAddress  = "127.0.0.1"
-		exampleToken    = tools.GenerateSignedString()
+		exampleToken    = tools.GenerateTokenString()
 		exampleLocation = "Fresno, California, United States"
 		exampleBrowser  = "Chrome on Windows 10.0"
 		exampleTime     = "10/23/2025 07:45am"
@@ -44,7 +44,7 @@ func DebugEmailRenderTemplates() {
 			},
 			"LOGIN_PASSCODE.txt": tools.LocalsLoginPasscode{
 				Code:     tools.GeneratePasscode(),
-				Lifetime: fmt.Sprint(tools.LIFETIME_TOKEN_EMAIL_PASSCODE.Minutes()),
+				Lifetime: fmt.Sprint(tools.TOKEN_LIFETIME_EMAIL_PASSCODE.Minutes()),
 			},
 			"NOTIFY_USER_DELETED.txt": tools.LocalsNotifyUserDeleted{
 				Reason: "User Request",

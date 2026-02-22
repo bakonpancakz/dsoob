@@ -22,17 +22,18 @@ const (
 	EPOCH_SECONDS                            = EPOCH_MILLI / 1000  // Generic EPOCH in Seconds
 	CONTEXT_TIMEOUT                          = 10 * time.Second    // Default Context Timeout
 	SHUTDOWN_TIMEOUT                         = 1 * time.Minute     // Default Shutdown Timeout
-	LIFETIME_TOKEN_USER_ELEVATION            = 10 * time.Minute    // Lifetime for User Elevation
-	LIFETIME_TOKEN_USER_COOKIE               = 30 * 24 * time.Hour // Lifetime for User Cookie
-	LIFETIME_TOKEN_EMAIL_PASSCODE            = 15 * time.Minute    // Lifetime for MFA Passcode
-	LIFETIME_TOKEN_EMAIL_LOGIN               = 24 * time.Hour      // Lifetime for Verify Login Token
-	LIFETIME_TOKEN_EMAIL_VERIFY              = 24 * time.Hour      // Lifetime for Verify Email Token
-	LIFETIME_TOKEN_EMAIL_RESET               = 24 * time.Hour      // Lifetime for Password Reset Token
 	PASSWORD_HASH_EFFORT                     = 12                  // Password Hashing Effort
 	PASSWORD_HISTORY_LIMIT                   = 5                   // Password History Length
 	PASSWORD_CONCURRENT_LIMIT                = 8                   // Password Hashing Concurrency Limit
 	MFA_PASSCODE_LENGTH                      = 6                   // TOTP Passcode String Length (Do Not Change)
 	MFA_RECOVERY_LENGTH                      = 8                   // TOTP Recovery Code Length (Do Not Change)
+	TOKEN_LIFETIME_USER_ELEVATION            = 10 * time.Minute    // Lifetime for User Elevation
+	TOKEN_LIFETIME_USER_COOKIE               = 30 * 24 * time.Hour // Lifetime for User Cookie
+	TOKEN_LIFETIME_EMAIL_PASSCODE            = 15 * time.Minute    // Lifetime for MFA Passcode
+	TOKEN_LIFETIME_EMAIL_LOGIN               = 24 * time.Hour      // Lifetime for Verify Login Token
+	TOKEN_LIFETIME_EMAIL_VERIFY              = 24 * time.Hour      // Lifetime for Verify Email Token
+	TOKEN_LIFETIME_EMAIL_RESET               = 24 * time.Hour      // Lifetime for Password Reset Token
+	TOKEN_BYTE_LENGTH                        = 64
 	TOKEN_PREFIX_USER                        = "User "
 	SESSION_KEY                   contextKey = "gloopert"
 )
@@ -48,7 +49,6 @@ var (
 	HTTP_TLS_CERT      = envString("HTTP_TLS_CERT", "tls_crt.pem")
 	HTTP_TLS_KEY       = envString("HTTP_TLS_KEY", "tls_key.pem")
 	HTTP_TLS_CA        = envString("HTTP_TLS_CA", "tls_ca.pem")
-	HTTP_KEY           = []byte(envString("HTTP_KEY", "teto"))
 )
 
 func init() {

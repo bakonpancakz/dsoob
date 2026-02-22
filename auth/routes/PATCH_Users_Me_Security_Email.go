@@ -44,8 +44,8 @@ func PATCH_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 	// Update User
 	var (
 		UserEmailAddressPrevious  string
-		UserEmailVerifyToken      = tools.GenerateSignedString()
-		UserEmailVerifyExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY)
+		UserEmailVerifyToken      = tools.GenerateTokenString()
+		UserEmailVerifyExpiration = time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_VERIFY)
 	)
 
 	tx, err := tools.Database.BeginTx(r.Context(), nil)

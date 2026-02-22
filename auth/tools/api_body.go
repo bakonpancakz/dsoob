@@ -28,7 +28,7 @@ func init() {
 
 	BodyValidator.RegisterValidation("publickey", func(fl validator.FieldLevel) bool {
 		str := fl.Field().String()
-		dec, err := base64.StdEncoding.DecodeString(str)
+		dec, err := base64.RawURLEncoding.DecodeString(str)
 		if err != nil {
 			return false
 		}
@@ -37,7 +37,7 @@ func init() {
 
 	BodyValidator.RegisterValidation("token", func(fl validator.FieldLevel) bool {
 		str := fl.Field().String()
-		return CompareSignedString(str)
+		return CompareTokenString(str)
 	})
 
 	BodyValidator.RegisterValidation("passcode", func(fl validator.FieldLevel) bool {

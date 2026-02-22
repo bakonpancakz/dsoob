@@ -45,7 +45,7 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 	// Create User
 	var (
 		UserID                = tools.GenerateSnowflake()
-		UserEmailVerifyToken  = tools.GenerateSignedString()
+		UserEmailVerifyToken  = tools.GenerateTokenString()
 		UserPasswordHash, err = tools.GeneratePasswordHash(Body.Password)
 	)
 	if err != nil {
@@ -69,7 +69,7 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 		tools.GetRemoteIP(r),
 		UserPasswordHash,
 		UserEmailVerifyToken,
-		time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY),
+		time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_VERIFY),
 		Body.Username,
 		Body.Username,
 	); err != nil {

@@ -74,7 +74,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 		SessionCreated   = time.Now()
 		SessionUserAgent = r.UserAgent()
 		SessionAddress   = tools.GetRemoteIP(r)
-		SessionToken     = tools.GenerateSignedString()
+		SessionToken     = tools.GenerateTokenString()
 	)
 	if UserMFAEnabled && UserMFASecret != nil {
 
@@ -140,7 +140,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 		// clicking on a button sent to their email address
 
 		// Generate Token
-		var UserLoginVerifyToken = tools.GenerateSignedString()
+		var UserLoginVerifyToken = tools.GenerateTokenString()
 		tag, err := tools.Database.ExecContext(r.Context(),
 			`UPDATE user SET
 				updated 		 = CURRENT_TIMESTAMP,
@@ -150,7 +150,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 			WHERE id = ?`,
 			UserLoginVerifyToken,
 			SessionAddress,
-			time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_LOGIN),
+			time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_LOGIN),
 			UserID,
 		)
 		if err != nil {

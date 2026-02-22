@@ -20,8 +20,8 @@ func POST_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	// Update User
 	var (
-		ResetTokenExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_RESET)
-		ResetToken           = tools.GenerateSignedString()
+		ResetTokenExpiration = time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_RESET)
+		ResetToken           = tools.GenerateTokenString()
 		UserID               int64
 		UserEmailAddress     string
 	)

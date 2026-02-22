@@ -129,7 +129,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 			// Update User
 			var (
 				NewPasscode           = tools.GeneratePasscode()
-				NewPasscodeExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_PASSCODE)
+				NewPasscodeExpiration = time.Now().Add(tools.TOKEN_LIFETIME_EMAIL_PASSCODE)
 			)
 			if _, err = tools.Database.ExecContext(r.Context(),
 				`UPDATE user SET
@@ -150,7 +150,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 				UserEmailAddress,
 				tools.LocalsLoginPasscode{
 					Code:     NewPasscode,
-					Lifetime: fmt.Sprint(tools.LIFETIME_TOKEN_EMAIL_PASSCODE.Minutes()),
+					Lifetime: fmt.Sprint(tools.TOKEN_LIFETIME_EMAIL_PASSCODE.Minutes()),
 				},
 			)
 
@@ -188,7 +188,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Mark Current Session as Elevated
-	elevatedUntil := time.Now().Add(tools.LIFETIME_TOKEN_USER_ELEVATION)
+	elevatedUntil := time.Now().Add(tools.TOKEN_LIFETIME_USER_ELEVATION)
 	if _, err := tools.Database.ExecContext(r.Context(),
 		"UPDATE user_session SET elevated_until = ? WHERE id = ?",
 		elevatedUntil,
