@@ -63,7 +63,7 @@ func main() {
 	stop()
 
 	// Begin Shutdown Process
-	timeout, finish := context.WithTimeout(context.Background(), tools.SHUTDOWN_TIMEOUT)
+	timeout, finish := context.WithTimeout(context.Background(), tools.TIMEOUT_SHUTDOWN)
 	defer finish()
 	go func() {
 		<-timeout.Done()
@@ -108,7 +108,7 @@ func StartupHTTP(stop context.Context, await *sync.WaitGroup) {
 		defer await.Done()
 		<-stop.Done()
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), tools.CONTEXT_TIMEOUT)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), tools.TIMEOUT_CONTEXT)
 		defer cancel()
 
 		if err := svr.Shutdown(shutdownCtx); err != nil {

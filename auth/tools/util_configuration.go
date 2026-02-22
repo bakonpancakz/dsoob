@@ -20,8 +20,8 @@ const (
 	SITE_NAME                                = "dsoob.net"         // Used for Emails and TOTP
 	EPOCH_MILLI                              = 1207008000000       // Generic EPOCH (April 1st 2008, Teto b-day!)
 	EPOCH_SECONDS                            = EPOCH_MILLI / 1000  // Generic EPOCH in Seconds
-	CONTEXT_TIMEOUT                          = 10 * time.Second    // Default Context Timeout
-	SHUTDOWN_TIMEOUT                         = 1 * time.Minute     // Default Shutdown Timeout
+	TIMEOUT_SHUTDOWN                         = 1 * time.Minute     // Default Timeout for Shutdowns
+	TIMEOUT_CONTEXT                          = 10 * time.Second    // Default Timeout for Requests
 	PASSWORD_HASH_EFFORT                     = 12                  // Password Hashing Effort
 	PASSWORD_HISTORY_LIMIT                   = 5                   // Password History Length
 	PASSWORD_CONCURRENT_LIMIT                = 8                   // Password Hashing Concurrency Limit
@@ -52,12 +52,30 @@ var (
 )
 
 func init() {
-	// Create Directories
-	// 	This will cause fatal errors elsewhere so it's ok!
-	os.MkdirAll(path.Join(DATA_DIRECTORY), FILEMODE_PUBLIC)
-	os.MkdirAll(path.Join(DATA_DIRECTORY, "public"), FILEMODE_PUBLIC)
-	os.MkdirAll(path.Join(DATA_DIRECTORY, "settings"), FILEMODE_SECURE)
-	os.MkdirAll(path.Join(DATA_DIRECTORY, "database"), FILEMODE_SECURE)
+	// Prepare Data Directories
+	for _, item := range []struct {
+		Permissions os.FileMode
+		Directory   string
+	}{
+		{FILEMODE_PUBLIC, "public"},
+		{FILEMODE_SECURE, "settings"},
+		{FILEMODE_SECURE, "database"},
+	} {
+		// Attempt to Create Directory
+		pth := path.Join(DATA_DIRECTORY, item.Directory)
+		err := os.MkdirAll(pth, item.Permissions)
+		if err != nil {
+			LoggerMain.Log(FATAL, "Cannot create '%s' directory: %s", pth, err)
+			return
+		}
+
+		// Override Permissions
+		err = os.Chmod(pth, item.Permissions)
+		if err != nil {
+			LoggerMain.Log(FATAL, "Cannot gatekeep '%s' directory: %s", pth, err)
+			return
+		}
+	}
 }
 
 // Create TLS Configuration from Crypto
