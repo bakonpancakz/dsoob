@@ -12,7 +12,7 @@ func POST_Auth_Logout(w http.ResponseWriter, r *http.Request) {
 
 	// Revoke Current Session
 	tag, err := tools.Database.ExecContext(r.Context(),
-		"DELETE FROM user_session WHERE id = $1 AND user_id = $2",
+		"DELETE FROM user_session WHERE id = ? AND user_id = ?",
 		session.SessionID,
 		session.UserID,
 	)

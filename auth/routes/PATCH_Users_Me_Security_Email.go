@@ -27,7 +27,7 @@ func PATCH_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 	// Duplicate Check
 	var UsageEmail int
 	err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT COUNT(*) FROM user WHERE email_address = LOWER($1)",
+		"SELECT COUNT(*) FROM user WHERE email_address = LOWER(?)",
 		Body.Email,
 	).Scan(
 		&UsageEmail,
@@ -47,27 +47,49 @@ func PATCH_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 		UserEmailVerifyToken      = tools.GenerateSignedString()
 		UserEmailVerifyExpiration = time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY)
 	)
-	err = tools.Database.
-		QueryRowContext(r.Context(),
-			`UPDATE user SET
-				updated			 	= CURRENT_TIMESTAMP,
-				email_verified 		= FALSE,
-				email_address 	 	= LOWER($1),
-				token_verify 	 	= $2,
-				token_verify_eat 	= $3
-			WHERE id = $4
-			RETURNING (SELECT email_address FROM user WHERE id = $4)`,
-			Body.Email,
-			UserEmailVerifyToken,
-			UserEmailVerifyExpiration,
-			session.UserID,
-		).
-		Scan(&UserEmailAddressPrevious)
+
+	tx, err := tools.Database.BeginTx(r.Context(), nil)
+	if err != nil {
+		tools.SendServerError(w, r, err)
+		return
+	}
+	defer tx.Rollback()
+
+	err = tx.QueryRow(
+		"SELECT email_address FROM user WHERE id = ?",
+		session.UserID,
+	).Scan(
+		&UserEmailAddressPrevious,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return
 	}
 	if err != nil {
+		tools.SendServerError(w, r, err)
+		return
+	}
+
+	_, err = tx.ExecContext(r.Context(),
+		`UPDATE user SET
+			updated			 	= CURRENT_TIMESTAMP,
+			email_verified 		= FALSE,
+			email_address 	 	= LOWER(?),
+			token_verify 	 	= ?,
+			token_verify_eat 	= ?
+		WHERE id = ?`,
+		Body.Email,
+		UserEmailVerifyToken,
+		UserEmailVerifyExpiration,
+		session.UserID,
+		session.UserID,
+	)
+	if err != nil {
+		tools.SendServerError(w, r, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
 		tools.SendServerError(w, r, err)
 		return
 	}

@@ -39,8 +39,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 			id, email_address, email_verified, ip_address,
 			mfa_enabled, mfa_secret, mfa_codes, mfa_codes_used,
 			password_hash
-		FROM user
-		WHERE email_address = LOWER($1)`,
+		FROM user WHERE email_address = LOWER(?)`,
 		Body.Email,
 	).Scan(
 		&UserID, &UserEmailAddress, &UserEmailVerified, &UserIPAddress,
@@ -111,7 +110,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 
 					// Mark Recovery Code as Used
 					if _, err := tools.Database.ExecContext(r.Context(),
-						"UPDATE user SET mfa_codes_used = mfa_codes_used | $1 WHERE id = $2",
+						"UPDATE user SET mfa_codes_used = mfa_codes_used | ? WHERE id = ?",
 						(1 << i),
 						UserID,
 					); err != nil {
@@ -145,10 +144,10 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 		tag, err := tools.Database.ExecContext(r.Context(),
 			`UPDATE user SET
 				updated 		 = CURRENT_TIMESTAMP,
-				token_login 	 = $1,
-				token_login_data = $2,
-				token_login_eat  = $3
-			WHERE id = $4`,
+				token_login 	 = ?,
+				token_login_data = ?,
+				token_login_eat  = ?
+			WHERE id = ?`,
 			UserLoginVerifyToken,
 			SessionAddress,
 			time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_LOGIN),
@@ -186,8 +185,8 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated    = CURRENT_TIMESTAMP,
-			ip_address = $1
-		WHERE id = $2`,
+			ip_address = ?
+		WHERE id = ?`,
 		SessionAddress,
 		UserID,
 	)
@@ -207,7 +206,7 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 	_, err = tools.Database.ExecContext(r.Context(),
 		`INSERT INTO user_session (
 			id, created, user_id, token, device_ip_address, device_user_agent, device_public_key
-		) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 		SessionID,
 		SessionCreated,
 		UserID,
@@ -234,7 +233,9 @@ func POST_Auth_Login(w http.ResponseWriter, r *http.Request) {
 
 	// Send Results
 	tools.SendJSON(w, r, http.StatusOK, map[string]any{
-		"prefix": tools.TOKEN_PREFIX_USER,
-		"token":  SessionToken,
+		"user_id":    UserID,
+		"session_id": SessionID,
+		"prefix":     tools.TOKEN_PREFIX_USER,
+		"token":      SessionToken,
 	})
 }

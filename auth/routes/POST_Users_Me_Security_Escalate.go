@@ -15,6 +15,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 
 	var Body struct {
 		Passcode string `json:"passcode" validate:"omitempty,passcode"`
+		Password string `json:"password" validate:"omitempty,password"`
 	}
 	if !tools.BindJSON(w, r, &Body) {
 		return
@@ -38,7 +39,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 			email_address, email_verified, mfa_enabled,
 			mfa_secret, mfa_codes, mfa_codes_used,
 			password_hash, token_passcode, token_passcode_eat
-		FROM user WHERE id = $1`,
+		FROM user WHERE id = ?`,
 		session.UserID,
 	).Scan(
 		&UserEmailAddress,
@@ -95,7 +96,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 
 					// Mark Recovery Code as Used
 					if _, err := tools.Database.ExecContext(r.Context(),
-						"UPDATE user SET mfa_codes_used = mfa_codes_used | $1 WHERE id = $2",
+						"UPDATE user SET mfa_codes_used = mfa_codes_used | ? WHERE id = ?",
 						(1 << i),
 						session.UserID,
 					); err != nil {
@@ -133,9 +134,9 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 			if _, err = tools.Database.ExecContext(r.Context(),
 				`UPDATE user SET
 					updated 		   = CURRENT_TIMESTAMP,
-					token_passcode 	   = $1,
-					token_passcode_eat = $2
-				WHERE id = $3`,
+					token_passcode 	   = ?,
+					token_passcode_eat = ?
+				WHERE id = ?`,
 				NewPasscode,
 				NewPasscodeExpiration,
 				session.UserID,
@@ -170,7 +171,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 
 		// Method: Password
 		// User must prove their ownership by entering their password
-		if match, err := tools.ComparePasswordHash(*UserPasswordHash, Body.Passcode); err != nil {
+		if match, err := tools.ComparePasswordHash(*UserPasswordHash, Body.Password); err != nil {
 			tools.SendServerError(w, r, err)
 			return
 		} else if !match {
@@ -189,7 +190,7 @@ func POST_Users_Me_Security_Escalate(w http.ResponseWriter, r *http.Request) {
 	// Mark Current Session as Elevated
 	elevatedUntil := time.Now().Add(tools.LIFETIME_TOKEN_USER_ELEVATION)
 	if _, err := tools.Database.ExecContext(r.Context(),
-		"UPDATE user_session SET elevated_until = $1 WHERE id = $2",
+		"UPDATE user_session SET elevated_until = ? WHERE id = ?",
 		elevatedUntil,
 		session.SessionID,
 	); err != nil {

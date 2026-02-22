@@ -1,48 +1,10 @@
 package routes
 
 import (
-	"database/sql"
-	"errors"
-	"net/http"
-
 	"dsoob/backend/tools"
+	"net/http"
 )
 
 func DELETE_Users_Me_Avatar(w http.ResponseWriter, r *http.Request) {
-
-	session := tools.GetSession(r)
-
-	// Update Account
-	var AvatarHash *string
-	err := tools.Database.QueryRowContext(r.Context(),
-		"UPDATE user SET avatar_hash = null WHERE id = $1 RETURNING avatar_hash",
-		session.UserID,
-	).Scan(
-		&AvatarHash,
-	)
-	if errors.Is(err, sql.ErrNoRows) {
-		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
-		return
-	}
-	if err != nil {
-		tools.SendServerError(w, r, err)
-		return
-	}
-
-	// Delete Image
-	if AvatarHash == nil {
-		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_IMAGE)
-		return
-	}
-	go func() {
-		paths := tools.ImagePaths(tools.ImageOptionsAvatars, session.UserID, *AvatarHash)
-		if err := tools.StoragePublicDelete(paths...); err != nil {
-			tools.LoggerStorage.Data(tools.ERROR, "Failed to Delete Profile Avatar", map[string]any{
-				"paths": paths,
-				"error": err.Error(),
-			})
-		}
-	}()
-
-	w.WriteHeader(http.StatusNoContent)
+	tools.EndpointImageDelete(w, r, "avatar_hash", tools.ImageOptionsAvatars)
 }

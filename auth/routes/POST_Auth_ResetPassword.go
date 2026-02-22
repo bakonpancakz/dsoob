@@ -28,9 +28,9 @@ func POST_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
-			token_reset_eat = $1,
-			token_reset 	= $2
-		WHERE email_address = LOWER($3)
+			token_reset_eat = ?,
+			token_reset 	= ?
+		WHERE email_address = LOWER(?)
 		RETURNING id, email_address`,
 		ResetTokenExpiration,
 		ResetToken,

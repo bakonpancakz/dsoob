@@ -21,7 +21,7 @@ func GET_Users_Me_Security_MFA_Codes(w http.ResponseWriter, r *http.Request) {
 		UserMFACodesRAW string
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT mfa_enabled, mfa_codes FROM user WHERE id = $1",
+		"SELECT mfa_enabled, mfa_codes FROM user WHERE id = ?",
 		session.UserID,
 	).Scan(
 		&UserMFAEnabled,

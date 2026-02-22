@@ -25,7 +25,6 @@ var (
 	ERROR_BODY_INVALID_TYPE           = APIError{Status: 400, Code: 0, Message: "Invalid Body Type"}
 	ERROR_BODY_INVALID_DATA           = APIError{Status: 422, Code: 0, Message: "Invalid Body"}
 	ERROR_BODY_INVALID_FIELD          = APIError{Status: 400, Code: 0, Message: "Invalid Body Field"}
-	ERROR_UNKNOWN_TOKEN               = APIError{Status: 404, Code: 1030, Message: "Unknown Token"}
 	ERROR_UNKNOWN_USER                = APIError{Status: 404, Code: 1020, Message: "Unknown User"}
 	ERROR_UNKNOWN_SESSION             = APIError{Status: 404, Code: 1040, Message: "Unknown Session"}
 	ERROR_UNKNOWN_IMAGE               = APIError{Status: 404, Code: 1050, Message: "Unknown Image"}

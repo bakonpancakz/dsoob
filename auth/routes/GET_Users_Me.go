@@ -36,14 +36,13 @@ func GET_Users_Me(w http.ResponseWriter, r *http.Request) {
 			username, displayname, subtitle, biography,
 			avatar_hash, banner_hash,
 			accent_banner, accent_border, accent_background
-		FROM user
-		WHERE id = $1`,
+		FROM user WHERE id = ?`,
 		session.UserID,
 	).Scan(
-		UserID, UserCreated, UserEmailAddress, UserEmailVerified, UserMFAEnabled,
-		UserName, UserDisplayname, UserSubtitle, UserBiography,
-		UserAvatarHash, UserBannerHash,
-		UserAccentBanner, UserAccentBorder, UserAccentBackground,
+		&UserID, &UserCreated, &UserEmailAddress, &UserEmailVerified, &UserMFAEnabled,
+		&UserName, &UserDisplayname, &UserSubtitle, &UserBiography,
+		&UserAvatarHash, &UserBannerHash,
+		&UserAccentBanner, &UserAccentBorder, &UserAccentBackground,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)

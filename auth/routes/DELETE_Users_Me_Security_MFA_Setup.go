@@ -22,7 +22,7 @@ func DELETE_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) 
 			mfa_secret	 	= NULL,
 			mfa_codes 		= '',
 			mfa_codes_used 	= 0
-		WHERE id = $1 AND mfa_enabled = TRUE`,
+		WHERE mfa_enabled = TRUE AND id = ?`,
 		session.UserID,
 	)
 	if err != nil {

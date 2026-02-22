@@ -2,8 +2,10 @@ package tools
 
 import (
 	"compress/gzip"
+	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -26,11 +28,11 @@ func init() {
 
 	BodyValidator.RegisterValidation("publickey", func(fl validator.FieldLevel) bool {
 		str := fl.Field().String()
-		dec, err := base64.RawURLEncoding.DecodeString(str)
+		dec, err := base64.StdEncoding.DecodeString(str)
 		if err != nil {
 			return false
 		}
-		return len(dec) == 32
+		return len(dec) == ed25519.PublicKeySize
 	})
 
 	BodyValidator.RegisterValidation("token", func(fl validator.FieldLevel) bool {
@@ -68,10 +70,11 @@ func init() {
 		return true
 	})
 
+	// Additionally displayname is used for subtitle validation
 	BodyValidator.RegisterValidation("displayname", func(fl validator.FieldLevel) bool {
 		str := fl.Field().String()
 		trm := strings.TrimSpace(str)
-		if len(str) != len(trm) || len(str) < 1 || len(str) > 32 {
+		if len(str) != len(trm) || len(str) > 32 {
 			return false
 		}
 		return true
@@ -116,6 +119,7 @@ func BindJSON(w http.ResponseWriter, r *http.Request, b any) bool {
 
 	// Struct Validation
 	if err := BodyValidator.Struct(b); err != nil {
+		fmt.Println("DELETE ME", err)
 		SendClientError(w, r, ERROR_BODY_INVALID_FIELD)
 		return false
 	}

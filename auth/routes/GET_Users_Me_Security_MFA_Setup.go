@@ -23,7 +23,7 @@ func GET_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		UserName         string
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT email_address, mfa_enabled, username FROM user WHERE id = $1",
+		"SELECT email_address, mfa_enabled, username FROM user WHERE id = ?",
 		session.UserID,
 	).Scan(
 		&UserEmailAddress,
@@ -48,18 +48,26 @@ func GET_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		setupSecret,
 	)
 
-	if _, err = tools.Database.ExecContext(r.Context(),
+	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
 			mfa_enabled 	= false,
-			mfa_secret 		= $2,
-			mfa_codes 		= $3,
+			mfa_secret 		= ?,
+			mfa_codes 		= ?,
 			mfa_codes_used 	= 0
-		WHERE id = $1`,
-		session.UserID,
+		WHERE id = ?`,
 		setupSecret,
 		strings.Join(setupCodes, tools.ARRAY_DELIMITER),
-	); err != nil {
+		session.UserID,
+	)
+	if c, err := tag.RowsAffected(); err != nil {
+		tools.SendServerError(w, r, err)
+		return
+	} else if c == 0 {
+		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
+		return
+	}
+	if err != nil {
 		tools.SendServerError(w, r, err)
 		return
 	}

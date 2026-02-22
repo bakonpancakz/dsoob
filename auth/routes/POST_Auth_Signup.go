@@ -22,8 +22,8 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 	var UsageUsername, UsageEmail int
 	if err := tools.Database.QueryRowContext(r.Context(),
 		`SELECT
-			(SELECT COUNT(*) FROM dsoob.profiles WHERE username = LOWER($1)),
-			(SELECT COUNT(*) FROM user WHERE email_address = LOWER($2))`,
+			(SELECT COUNT(*) FROM user WHERE username      = LOWER(?)),
+			(SELECT COUNT(*) FROM user WHERE email_address = LOWER(?))`,
 		Body.Username,
 		Body.Email,
 	).Scan(
@@ -56,20 +56,21 @@ func POST_Auth_Signup(w http.ResponseWriter, r *http.Request) {
 		`INSERT INTO user (
 			id,
 			email_address,
-			ip_address
+			ip_address,
 			password_hash,
 			password_history,
 			token_verify,
 			token_verify_eat,
 			username,
 			displayname
-		) VALUES ($1, LOWER($2), $3, $4, $4, $5, $6, LOWER($7), $7)`,
+		) VALUES (?, LOWER(?), ?, ?, ?, ?, ?, LOWER(?), ?)`,
 		UserID,
 		Body.Email,
 		tools.GetRemoteIP(r),
 		UserPasswordHash,
 		UserEmailVerifyToken,
 		time.Now().Add(tools.LIFETIME_TOKEN_EMAIL_VERIFY),
+		Body.Username,
 		Body.Username,
 	); err != nil {
 		tools.SendServerError(w, r, err)

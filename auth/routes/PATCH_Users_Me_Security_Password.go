@@ -27,7 +27,7 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 		UserPasswordHistoryRAW string
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT email_address, password_hash, password_history FROM user WHERE id = $1",
+		"SELECT email_address, password_hash, password_history FROM user WHERE id = ?",
 		session.UserID,
 	).Scan(
 		&UserEmailAddress,
@@ -62,7 +62,7 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 		if ok, err := tools.ComparePasswordHash(oldPassword, Body.NewPassword); err != nil {
 			tools.SendServerError(w, r, err)
 			return
-		} else if !ok {
+		} else if ok {
 			tools.SendClientError(w, r, tools.ERROR_LOGIN_PASSWORD_ALREADY_USED)
 			return
 		}
@@ -81,9 +81,9 @@ func PATCH_Users_Me_Security_Password(w http.ResponseWriter, r *http.Request) {
 	tag, err := tools.Database.ExecContext(r.Context(),
 		`UPDATE user SET
 			updated			 = CURRENT_TIMESTAMP,
-			password_hash	 = $1,
-			password_history = $2
-		WHERE id = $3`,
+			password_hash	 = ?,
+			password_history = ?
+		WHERE id = ?`,
 		newPasswordHash,
 		strings.Join(UserPasswordHistory, tools.ARRAY_DELIMITER),
 		session.UserID,

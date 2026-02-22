@@ -93,7 +93,7 @@ func setupEmailTemplate[L any](filename, subjectLine string) func(toAddress stri
 		errObject := map[string]any{}
 		if err != nil {
 			errObject["message"] = err.Error()
-			errObject["error"] = err
+			errObject["raw"] = err
 		}
 
 		LoggerEmail.Data(INFO, "Email Info", map[string]any{

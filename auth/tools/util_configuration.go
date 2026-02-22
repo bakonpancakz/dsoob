@@ -39,7 +39,7 @@ const (
 
 var (
 	DATA_DIRECTORY     = envString("DATA_DIRECTORY", "./data")
-	EMAIL_SMTP_HOST    = envString("EMAIL_SMTP_HOST", "127.0.0.1")
+	EMAIL_SMTP_HOST    = envString("EMAIL_SMTP_HOST", "127.0.0.1:1273")
 	EMAIL_SMTP_ADDRESS = envString("EMAIL_SMTP_ADDRESS", "noreply@example.org")
 	HTTP_ADDRESS       = envString("HTTP_ADDRESS", "127.0.0.1:8080")
 	HTTP_IP_HEADERS    = envSlice("HTTP_IP_HEADERS", ",", []string{"X-Forwarded-For"})

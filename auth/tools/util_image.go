@@ -19,12 +19,12 @@ import (
 // NOTE: For performance order your formats from largest to smallest as the
 // previous resize is used to improve performance. (Less Pixels = Less Work!)
 
-type imageOptions struct {
+type ImageOptions struct {
 	Folder  string
-	Formats []imageFormat
+	Formats []ImageFormat
 }
 
-type imageFormat struct {
+type ImageFormat struct {
 	Name    string
 	Height  int
 	Width   int
@@ -34,18 +34,18 @@ type imageFormat struct {
 var (
 	ErrImageMalformed   = errors.New("malformed image data")
 	ErrImageUnsupported = errors.New("unsupported image format")
-	ImageOptionsAvatars = imageOptions{"avatars", []imageFormat{
+	ImageOptionsAvatars = ImageOptions{"avatars", []ImageFormat{
 		{"lg.jpeg", 144, 144, 80},
 		{"md.jpeg", 96, 96, 50},
 		{"sm.jpeg", 48, 48, 25},
 	}}
-	ImageOptionsBanners = imageOptions{"banners", []imageFormat{
+	ImageOptionsBanners = ImageOptions{"banners", []ImageFormat{
 		{"lg.jpeg", 160, 480, 90},
 	}}
 )
 
 // Return Paths for Images that would be generated using the given options
-func ImagePaths(o imageOptions, id int64, hash string) []string {
+func ImagePaths(o ImageOptions, id int64, hash string) []string {
 	paths := make([]string, 0, len(o.Formats))
 	for _, f := range o.Formats {
 		paths = append(paths, path.Join(o.Folder, strconv.FormatInt(id, 10), hash, f.Name))
@@ -55,7 +55,7 @@ func ImagePaths(o imageOptions, id int64, hash string) []string {
 
 // Helper Function that calls ImageProcessor to handle the given image, it aborts the request
 // with the appropriate API Error in case of failure. You should return early if false is returned.
-func ImageHandler(w http.ResponseWriter, r *http.Request, o imageOptions, id int64, d []byte) (bool, string) {
+func ImageHandler(w http.ResponseWriter, r *http.Request, o ImageOptions, id int64, d []byte) (bool, string) {
 	hash, err := ImageProcessor(o, id, d)
 	if errors.Is(err, ErrImageUnsupported) {
 		SendClientError(w, r, ERROR_IMAGE_UNSUPPORTED)
@@ -74,7 +74,7 @@ func ImageHandler(w http.ResponseWriter, r *http.Request, o imageOptions, id int
 
 // All-In-One Function that resizes an image into multiple formats and stores them,
 // returning a unique hash intended to be stored in the database.
-func ImageProcessor(o imageOptions, id int64, d []byte) (string, error) {
+func ImageProcessor(o ImageOptions, id int64, d []byte) (string, error) {
 
 	// Decode Image with the appropriate decoder based on it's starting bytes
 	// https://en.wikipedia.org/wiki/Magic_number_(programming)#Magic_numbers_in_files)

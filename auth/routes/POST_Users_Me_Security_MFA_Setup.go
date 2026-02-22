@@ -22,7 +22,7 @@ func POST_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 		UserMFASecret  *string
 	)
 	if err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT mfa_enabled, mfa_secret FROM user WHERE id = $1",
+		"SELECT mfa_enabled, mfa_secret FROM user WHERE id = ?",
 		session.UserID,
 	).Scan(
 		&UserMFAEnabled,
@@ -46,7 +46,7 @@ func POST_Users_Me_Security_MFA_Setup(w http.ResponseWriter, r *http.Request) {
 
 	// Update User
 	if _, err := tools.Database.ExecContext(r.Context(),
-		"UPDATE user SET mfa_enabled = TRUE WHERE id = $1",
+		"UPDATE user SET mfa_enabled = TRUE WHERE id = ?",
 		session.UserID,
 	); err != nil {
 		tools.SendServerError(w, r, err)

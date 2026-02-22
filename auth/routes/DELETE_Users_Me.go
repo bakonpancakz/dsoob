@@ -24,7 +24,7 @@ func DELETE_Users_Me(w http.ResponseWriter, r *http.Request) {
 		UserBannerHash   *string
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
-		"DELETE FROM user WHERE id = $1 RETURNING id, email_address, avatar_hash, banner_hash",
+		"DELETE FROM user WHERE id = ? RETURNING id, email_address, avatar_hash, banner_hash",
 		session.UserID,
 	).Scan(
 		&UserID,

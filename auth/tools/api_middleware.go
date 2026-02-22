@@ -110,7 +110,7 @@ func UseSession(w http.ResponseWriter, r *http.Request) bool {
 		var sessionElevatedUntil time.Time
 
 		err := Database.QueryRowContext(r.Context(),
-			"SELECT id, user_id, elevated_until FROM user_session WHERE token = $1",
+			"SELECT id, user_id, elevated_until FROM user_session WHERE token = ?",
 			strings.TrimPrefix(h, TOKEN_PREFIX_USER),
 		).Scan(
 			&session.SessionID,

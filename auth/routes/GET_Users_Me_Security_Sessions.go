@@ -12,7 +12,7 @@ func GET_Users_Me_Security_Sessions(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch Sessions
 	rows, err := tools.Database.QueryContext(r.Context(),
-		"SELECT id, device_ip_address, device_user_agent, device_public_key FROM user_session WHERE user_id = $1",
+		"SELECT id, device_ip_address, device_user_agent, device_public_key FROM user_session WHERE user_id = ?",
 		session.UserID,
 	)
 	if err != nil {

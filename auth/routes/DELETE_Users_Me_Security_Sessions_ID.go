@@ -20,14 +20,14 @@ func DELETE_Users_Me_Security_Sessions_ID(w http.ResponseWriter, r *http.Request
 
 	// Delete Relevant Session
 	tag, err := tools.Database.ExecContext(r.Context(),
-		"DELETE FROM user WHERE id = $1 AND user_id = $2",
+		"DELETE FROM user_session WHERE id = ?",
 		snowflake,
-		session.UserID,
 	)
 	if err != nil {
 		tools.SendServerError(w, r, err)
 		return
 	}
+
 	if c, err := tag.RowsAffected(); err != nil {
 		tools.SendServerError(w, r, err)
 		return

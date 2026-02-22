@@ -23,7 +23,7 @@ func POST_Auth_VerifyLogin(w http.ResponseWriter, r *http.Request) {
 			token_login 	 = NULL,
 			token_login_data = NULL,
 			token_login_eat  = NULL
-		WHERE token_login = $1 AND token_login_eat > NOW()`,
+		WHERE token_login = ? AND token_login_eat > CURRENT_TIMESTAMP`,
 		Body.Token,
 	)
 	if err != nil {
@@ -34,7 +34,7 @@ func POST_Auth_VerifyLogin(w http.ResponseWriter, r *http.Request) {
 		tools.SendServerError(w, r, err)
 		return
 	} else if c == 0 {
-		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_TOKEN)
+		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return
 	}
 

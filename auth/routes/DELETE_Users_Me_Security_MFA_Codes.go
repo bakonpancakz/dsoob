@@ -18,11 +18,11 @@ func DELETE_Users_Me_Security_MFA_Codes(w http.ResponseWriter, r *http.Request) 
 	// Regenerate Recovery Codes
 	recoveryCodes := tools.GenerateRecoveryCodes()
 	tag, err := tools.Database.ExecContext(r.Context(),
-		`UPDATE dsoob.users SET
+		`UPDATE user SET
 			updated 		= CURRENT_TIMESTAMP,
-			mfa_codes 		= $1,
+			mfa_codes 		= ?,
 			mfa_codes_used 	= 0
-		WHERE id = $2 AND mfa_enabled = TRUE`,
+		WHERE mfa_enabled = TRUE AND id = ?`,
 		strings.Join(recoveryCodes, tools.ARRAY_DELIMITER),
 		session.UserID,
 	)

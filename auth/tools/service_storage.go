@@ -2,9 +2,11 @@ package tools
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
+	"strings"
 )
 
 var (
@@ -26,11 +28,15 @@ func StoragePublicCreate(filepath, filename string, perms os.FileMode) (io.Write
 
 // Delete a public file in the `{DATA_DIRECTORY}/public/` directory
 func StoragePublicDelete(filenames ...string) error {
+	var errors []string
 	for _, fn := range filenames {
 		fp := path.Join(DATA_DIRECTORY, "public", fn)
 		if err := os.Remove(fp); err != nil {
-			return err
+			errors = append(errors, err.Error())
 		}
+	}
+	if len(errors) > 0 {
+		return fmt.Errorf("deletion errors: %s", strings.Join(errors, ","))
 	}
 	return nil
 }

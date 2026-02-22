@@ -22,9 +22,9 @@ func POST_Users_Me_Security_Email(w http.ResponseWriter, r *http.Request) {
 	err := tools.Database.QueryRowContext(r.Context(),
 		`UPDATE user SET
 			updated 		 = CURRENT_TIMESTAMP,
-			token_verify 	 = $1,
-			token_verify_eat = $2
-		WHERE id = $3 AND email_verified = FALSE
+			token_verify 	 = ?,
+			token_verify_eat = ?
+		WHERE id = ? AND email_verified = FALSE
 		RETURNING email_address`,
 		UserEmailVerifyToken,
 		UserEmailVerifyExpiration,

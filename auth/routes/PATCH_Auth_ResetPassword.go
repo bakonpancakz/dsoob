@@ -26,7 +26,8 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 		UserPasswordHistoryRAW string
 	)
 	err := tools.Database.QueryRowContext(r.Context(),
-		"SELECT id, email_address, password_history FROM user WHERE token_reset = $1 AND token_reset_eat > NOW()",
+		`SELECT id, email_address, password_history
+		FROM user WHERE token_reset = ? AND token_reset_eat > CURRENT_TIMESTAMP`,
 		Body.Token,
 	).Scan(
 		&UserID,
@@ -48,7 +49,7 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 		if ok, err := tools.ComparePasswordHash(oldPassword, Body.NewPassword); err != nil {
 			tools.SendServerError(w, r, err)
 			return
-		} else if !ok {
+		} else if ok {
 			tools.SendClientError(w, r, tools.ERROR_LOGIN_PASSWORD_ALREADY_USED)
 			return
 		}
@@ -69,9 +70,9 @@ func PATCH_Auth_ResetPassword(w http.ResponseWriter, r *http.Request) {
 			updated 		 = CURRENT_TIMESTAMP,
 			token_reset 	 = NULL,
 			token_reset_eat	 = NULL,
-			password_hash 	 = $1,
-			password_history = $2
-		WHERE id = $3`,
+			password_hash 	 = ?,
+			password_history = ?
+		WHERE id = ?`,
 		newPasswordHash,
 		strings.Join(UserPasswordHistory, tools.ARRAY_DELIMITER),
 		UserID,

@@ -46,8 +46,7 @@ func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 			accent_banner,
 			accent_border,
 			accent_background
-		FROM dsoob.profiles
-		WHERE id = $1`,
+		FROM user WHERE id = ?`,
 		session.UserID,
 	).Scan(
 		&UserName,
@@ -125,15 +124,15 @@ func PATCH_Users_Me(w http.ResponseWriter, r *http.Request) {
 
 	// Update User
 	tag, err := tools.Database.ExecContext(r.Context(),
-		`UPDATE dsoob.profiles SET
+		`UPDATE user SET
 			updated 		  = CURRENT_TIMESTAMP,
-			displayname 	  = $1,
-			subtitle 		  = $2,
-			biography		  = $3,
-			accent_banner 	  = $4,
-			accent_border	  = $5,
-			accent_background = $6
-		WHERE id = $7`,
+			displayname 	  = ?,
+			subtitle 		  = ?,
+			biography		  = ?,
+			accent_banner 	  = ?,
+			accent_border	  = ?,
+			accent_background = ?
+		WHERE id = ?`,
 		UserDisplayname,
 		UserSubtitle,
 		UserBiography,

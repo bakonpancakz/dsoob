@@ -2,7 +2,9 @@ package routes
 
 import (
 	"dsoob/backend/tools"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -15,15 +17,24 @@ func POST_Users_Bulk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch Users
-	rows, err := tools.Database.QueryContext(r.Context(),
+	// Build Query
+	placeholders := make([]string, len(Body.UserIDs))
+	arguments := make([]any, len(Body.UserIDs))
+	for i, id := range Body.UserIDs {
+		placeholders[i] = "?"
+		arguments[i] = id
+	}
+	query := fmt.Sprintf(
 		`SELECT
 			id, created, username, displayname,
 			subtitle, biography, avatar_hash, banner_hash,
 			accent_banner, accent_border, accent_background
-		FROM user WHERE id = IN($1)`,
-		Body.UserIDs,
+		FROM user WHERE id IN (%s)`,
+		strings.Join(placeholders, ","),
 	)
+
+	// Fetch Users
+	rows, err := tools.Database.QueryContext(r.Context(), query, arguments...)
 	if err != nil {
 		tools.SendServerError(w, r, err)
 		return

@@ -14,7 +14,7 @@ func GET_Users_ID_Keychain(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch Sessions
 	rows, err := tools.Database.QueryContext(r.Context(),
-		"SELECT device_public_key FROM user_session WHERE user_id = $1",
+		"SELECT device_public_key FROM user_session WHERE user_id = ?",
 		userID,
 	)
 	if err != nil {
@@ -33,6 +33,7 @@ func GET_Users_ID_Keychain(w http.ResponseWriter, r *http.Request) {
 			tools.SendServerError(w, r, err)
 			return
 		}
+		UserItems = append(UserItems, UserKey)
 	}
 
 	// Return Results

@@ -22,7 +22,7 @@ func POST_Auth_VerifyEmail(w http.ResponseWriter, r *http.Request) {
 			email_verified   = TRUE,
 			token_verify 	 = NULL,
 			token_verify_eat = NULL
-		WHERE token_verify = $1 AND token_verify_eat > NOW()`,
+		WHERE token_verify = ? AND token_verify_eat > CURRENT_TIMESTAMP`,
 		Body.Token,
 	)
 	if err != nil {
@@ -33,7 +33,7 @@ func POST_Auth_VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		tools.SendServerError(w, r, err)
 		return
 	} else if c == 0 {
-		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_TOKEN)
+		tools.SendClientError(w, r, tools.ERROR_UNKNOWN_USER)
 		return
 	}
 
